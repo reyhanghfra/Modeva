@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html><head><title>Admin - Modeva</title></head>
+<body>
+    <h1>Dashboard Admin</h1>
+    <form method="POST" action="/logout">
+        @csrf
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>
