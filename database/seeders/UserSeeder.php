@@ -7,16 +7,47 @@ use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * Menjalankan database seeder secara idempotent.
+     */
     public function run(): void
     {
         $users = [
-            ['name' => 'Admin', 'email' => 'admin@modeva.test', 'role' => 'admin'],
-            ['name' => 'Petugas', 'email' => 'petugas@modeva.test', 'role' => 'petugas'],
-            ['name' => 'Pelanggan', 'email' => 'pelanggan@modeva.test', 'role' => 'pelanggan'],
+            [
+                'name' => 'Admin Modeva',
+                'email' => 'admin@modeva.test',
+                'role' => 'admin',
+                'is_active' => true,
+                'password' => 'password',
+            ],
+            [
+                'name' => 'Petugas Modeva',
+                'email' => 'petugas@modeva.test',
+                'role' => 'petugas',
+                'is_active' => true,
+                'password' => 'password',
+            ],
+            [
+                'name' => 'Pelanggan Modeva',
+                'email' => 'pelanggan@modeva.test',
+                'role' => 'pelanggan',
+                'is_active' => true,
+                'password' => 'password',
+            ],
+            [
+                'name' => 'Pelanggan Nonaktif',
+                'email' => 'nonaktif@modeva.test',
+                'role' => 'pelanggan',
+                'is_active' => false,
+                'password' => 'password',
+            ],
         ];
 
-        foreach ($users as $user) {
-            User::create([...$user, 'password' => 'password']);
+        foreach ($users as $userData) {
+            User::updateOrCreate(
+                ['email' => $userData['email']],
+                $userData
+            );
         }
     }
 }

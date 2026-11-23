@@ -2,47 +2,95 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function showLogin()
+    /**
+     * Menampilkan formulir login.
+     */
+    public function showLogin(): View|RedirectResponse
     {
+        if (Auth::check()) {
+            return redirect()->route(Auth::user()->homeRoute());
+        }
+
         return view('auth.login');
     }
 
-    public function login(Request $request)
+    /**
+     * Menangani autentikasi login pengguna.
+     */
+    public function login(LoginRequest $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $throttleKey = Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
 
-        $user = \App\Models\User::where('email', $credentials['email'])->first();
+        // Batasi percobaan login: maksimal 5 kali gagal
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
 
-        if ($user && !$user->is_active) {
-            return back()->withErrors(['email' => 'Akun Anda dinonaktifkan.']);
+            return back()
+                ->withInput($request->only('email', 'remember'))
+                ->withErrors([
+                    'email' => "Terlalu banyak percobaan, coba lagi {$seconds} detik.",
+                ]);
         }
 
-        if (!Auth::attempt($credentials)) {
-            return back()->withErrors(['email' => 'Email atau password salah.']);
+        $credentials = $request->only('email', 'password');
+        $remember = $request->boolean('remember');
+
+        // Verifikasi kredensial terlebih dahulu
+        if (! Auth::attempt($credentials, $remember)) {
+            RateLimiter::hit($throttleKey);
+
+            return back()
+                ->withInput($request->only('email', 'remember'))
+                ->withErrors([
+                    'email' => 'Email atau password salah.',
+                ]);
         }
 
+        // Kredensial benar, selanjutnya periksa apakah akun aktif
+        $user = Auth::user();
+
+        if (! $user->is_active) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()
+                ->withInput($request->only('email', 'remember'))
+                ->withErrors([
+                    'email' => 'Akun Anda dinonaktifkan, hubungi admin.',
+                ]);
+        }
+
+        // Reset rate limiter saat login berhasil
+        RateLimiter::clear($throttleKey);
+
+        // Regenerate session untuk mencegah session fixation
         $request->session()->regenerate();
 
-        return match (Auth::user()->role) {
-            'admin'    => redirect('/admin/dashboard'),
-            'petugas'  => redirect('/petugas/dashboard'),
-            default    => redirect('/'),
-        };
+        // Redirect ke halaman utama sesuai role
+        return redirect()->route($user->homeRoute());
     }
 
-    public function logout(Request $request)
+    /**
+     * Mengeluarkan pengguna dari sistem (logout).
+     */
+    public function logout(Request $request): RedirectResponse
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/login');
+
+        return redirect()->route('login');
     }
 }

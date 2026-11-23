@@ -23,4 +23,16 @@ class User extends Authenticatable
             'is_active' => 'boolean',
         ];
     }
+
+    /**
+     * Mendapatkan nama route halaman utama berdasarkan role pengguna.
+     */
+    public function homeRoute(): string
+    {
+        return match ($this->role) {
+            'admin' => 'admin.dashboard',
+            'petugas' => 'petugas.dashboard',
+            default => 'home',
+        };
+    }
 }
