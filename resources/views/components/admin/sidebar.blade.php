@@ -1,4 +1,11 @@
 @php
+    use Illuminate\Support\Facades\Schema;
+
+    $pendingPaymentCount = 0;
+    if (Schema::hasTable('payments')) {
+        $pendingPaymentCount = \App\Models\Payment::where('status', \App\Models\Payment::STATUS_MENUNGGU_VERIFIKASI)->count();
+    }
+
     $menus = [
         [
             'name' => 'Ringkasan',
@@ -11,6 +18,11 @@
             'route' => 'admin.products.index',
         ],
         [
+            'name' => 'Kategori',
+            'icon' => 'tag',
+            'route' => 'admin.categories.index',
+        ],
+        [
             'name' => 'Inventori',
             'icon' => 'layers',
             'route' => 'admin.inventory.index',
@@ -19,6 +31,12 @@
             'name' => 'Transaksi',
             'icon' => 'receipt',
             'route' => 'admin.transactions.index',
+        ],
+        [
+            'name' => 'Verifikasi Pembayaran',
+            'icon' => 'shield-check',
+            'route' => 'admin.payments.index',
+            'badge' => $pendingPaymentCount > 0 ? $pendingPaymentCount : null,
         ],
         [
             'name' => 'Pelanggan',
@@ -31,9 +49,14 @@
             'route' => 'admin.reports.index',
         ],
         [
+            'name' => 'Pengguna',
+            'icon' => 'users',
+            'route' => 'admin.users.index',
+        ],
+        [
             'name' => 'Pengaturan',
             'icon' => 'settings',
-            'route' => 'admin.settings.index',
+            'route' => 'admin.password.edit',
         ],
     ];
 
@@ -72,7 +95,7 @@
             </div>
 
             {{-- Navigation Menu --}}
-            <nav class="space-y-1.5" aria-label="Navigasi Utama">
+            <nav class="space-y-1" aria-label="Navigasi Utama">
                 @foreach ($menus as $item)
                     @php
                         $hasRoute = Route::has($item['route']);
@@ -82,15 +105,23 @@
 
                     <a
                         href="{{ $url }}"
-                        class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors {{ $isActive ? 'bg-[#33312E] text-white shadow-sm' : 'text-[#A8A29E] hover:text-[#FAF8F5] hover:bg-[#2B2A28]' }}"
+                        class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors {{ $isActive ? 'bg-[#33312E] text-white shadow-xs' : 'text-[#A8A29E] hover:text-[#FAF8F5] hover:bg-[#2B2A28]' }}"
                         @if ($isActive) aria-current="page" @endif
                     >
-                        <x-icon
-                            :name="$item['icon']"
-                            class="w-5 h-5 shrink-0 {{ $isActive ? 'text-white' : 'text-[#A8A29E]' }}"
-                            strokeWidth="1.75"
-                        />
-                        <span>{{ $item['name'] }}</span>
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <x-icon
+                                :name="$item['icon']"
+                                class="w-5 h-5 shrink-0 {{ $isActive ? 'text-white' : 'text-[#A8A29E]' }}"
+                                strokeWidth="1.75"
+                            />
+                            <span class="truncate">{{ $item['name'] }}</span>
+                        </div>
+
+                        @if (!empty($item['badge']))
+                            <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold bg-amber-500 text-white rounded-full shrink-0">
+                                {{ $item['badge'] }}
+                            </span>
+                        @endif
                     </a>
                 @endforeach
             </nav>

@@ -7,12 +7,14 @@
     $variantClasses = match ($variant) {
         'success' => 'bg-emerald-50 text-emerald-800 border-emerald-200/60',
         'danger' => 'bg-rose-50 text-rose-800 border-rose-200/60',
+        'secondary', 'neutral', 'gray' => 'bg-[#F2EFE9] text-[#78716C] border-[#E5DDD2]',
         default => 'bg-[#FAF2E8] text-[#8C5E28] border-[#ECD9C3]',
     };
 
     $dotClasses = match ($variant) {
         'success' => 'bg-emerald-500',
         'danger' => 'bg-rose-500',
+        'secondary', 'neutral', 'gray' => 'bg-[#8A827A]',
         default => 'bg-[#B87A33]',
     };
 @endphp
