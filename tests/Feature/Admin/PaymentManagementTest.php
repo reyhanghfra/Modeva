@@ -23,15 +23,17 @@ class PaymentManagementTest extends TestCase
     {
         parent::setUp();
 
-        // Buat tabel orders sementara untuk integrasi pengujian
-        Schema::create('orders', function ($table) {
-            $table->id();
-            $table->string('order_number');
-            $table->foreignId('user_id');
-            $table->unsignedBigInteger('total');
-            $table->string('status')->default('verifikasi_pembayaran');
-            $table->timestamps();
-        });
+        // Buat tabel orders sementara jika belum ada di migrasi
+        if (! Schema::hasTable('orders')) {
+            Schema::create('orders', function ($table) {
+                $table->id();
+                $table->string('order_number');
+                $table->foreignId('user_id');
+                $table->unsignedBigInteger('total');
+                $table->string('status')->default('verifikasi_pembayaran');
+                $table->timestamps();
+            });
+        }
 
         $this->admin = User::factory()->create([
             'role' => 'admin',
