@@ -3,10 +3,9 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class CategoryManagementTest extends TestCase
@@ -14,6 +13,7 @@ class CategoryManagementTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $pelanggan;
 
     protected function setUp(): void
@@ -112,21 +112,8 @@ class CategoryManagementTest extends TestCase
 
     public function test_category_cannot_be_deleted_if_used_by_products(): void
     {
-        // Buat tabel products sementara untuk menguji canBeDeleted
-        Schema::create('products', function ($table) {
-            $table->id();
-            $table->foreignId('category_id');
-            $table->string('name');
-            $table->timestamps();
-        });
-
         $category = Category::factory()->create();
-        DB::table('products')->insert([
-            'category_id' => $category->id,
-            'name' => 'Baju Linen',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        Product::factory()->for($category)->create();
 
         $response = $this->actingAs($this->admin)->delete(route('admin.categories.destroy', $category));
 
