@@ -198,15 +198,17 @@ class UserManagementTest extends TestCase
 
     public function test_user_with_orders_cannot_be_deleted(): void
     {
-        // Buat tabel orders sementara untuk simulasi
-        Schema::create('orders', function ($table) {
-            $table->id();
-            $table->string('order_number');
-            $table->foreignId('user_id');
-            $table->unsignedBigInteger('total');
-            $table->string('status')->default('menunggu_pembayaran');
-            $table->timestamps();
-        });
+        // Buat tabel orders sementara jika belum ada di migrasi
+        if (! Schema::hasTable('orders')) {
+            Schema::create('orders', function ($table) {
+                $table->id();
+                $table->string('order_number');
+                $table->foreignId('user_id');
+                $table->unsignedBigInteger('total');
+                $table->string('status')->default('menunggu_pembayaran');
+                $table->timestamps();
+            });
+        }
 
         $userWithOrder = User::factory()->create();
         \Illuminate\Support\Facades\DB::table('orders')->insert([
