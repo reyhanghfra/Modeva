@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/pengaturan/password', [PasswordController::class, 'update'])
         ->middleware('throttle:5,1')
         ->name('password.update');
+
+    // Fitur 7: Laporan Penjualan
+    Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/laporan/ekspor', [ReportController::class, 'export'])->name('reports.export');
 });
 
 // Area Petugas (Khusus Role Petugas)
