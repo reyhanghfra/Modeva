@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 /**
@@ -56,7 +55,7 @@ class Category extends Model
         $slug = $baseSlug;
         $counter = 1;
 
-        while (static::where('slug', $slug)->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))->exists()) {
+        while (static::where('slug', $slug)->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->exists()) {
             $slug = "{$baseSlug}-{$counter}";
             $counter++;
         }
@@ -72,29 +71,13 @@ class Category extends Model
         return $query->where('is_active', true);
     }
 
-    /**
-     * Relasi ke produk.
-     * TODO: Definisikan relasi hasMany setelah tabel dan model Product dibuat oleh Orang 2.
-     */
-    public function products()
+    public function products(): HasMany
     {
-        if (class_exists(\App\Models\Product::class)) {
-            return $this->hasMany(\App\Models\Product::class);
-        }
-
-        return null;
+        return $this->hasMany(Product::class);
     }
 
-    /**
-     * Memeriksa apakah kategori aman untuk dihapus (tidak memiliki produk terkait).
-     */
     public function canBeDeleted(): bool
     {
-        if (Schema::hasTable('products')) {
-            // TODO: cek keterkaitan dengan tabel products (milik Orang 2)
-            return ! DB::table('products')->where('category_id', $this->id)->exists();
-        }
-
-        return true;
+        return ! $this->products()->exists();
     }
 }
