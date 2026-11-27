@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\Rupiah;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,10 +24,16 @@ class Order extends Model
     public const STATUS_SELESAI = 'selesai';
     public const STATUS_DIBATALKAN = 'dibatalkan';
 
+    public const PETUGAS_ACTION_STATUSES = [
+        self::STATUS_VERIFIKASI_PEMBAYARAN,
+        self::STATUS_DIPROSES,
+    ];
+
     protected $fillable = [
         'order_number',
         'user_id',
         'shipping_address',
+        'shipping_service',
         'total',
         'status',
     ];
@@ -68,6 +75,22 @@ class Order extends Model
     public function latestPayment(): HasOne
     {
         return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    /**
+     * Scope transaksi yang membutuhkan penanganan operasional petugas.
+     */
+    public function scopeNeedsPetugasAction(Builder $query): Builder
+    {
+        return $query->whereIn('status', self::PETUGAS_ACTION_STATUSES);
+    }
+
+    /**
+     * Memeriksa apakah transaksi berada dalam kewenangan penanganan petugas.
+     */
+    public function canBeHandledByPetugas(): bool
+    {
+        return in_array($this->status, self::PETUGAS_ACTION_STATUSES, true);
     }
 
     /**

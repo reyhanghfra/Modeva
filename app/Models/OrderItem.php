@@ -39,6 +39,55 @@ class OrderItem extends Model
     }
 
     /**
+     * Mendapatkan warna produk dari atribut varian (format "Warna · Ukuran").
+     */
+    public function getColorAttribute(): string
+    {
+        [$color] = $this->parseVariantParts();
+
+        return $color;
+    }
+
+    /**
+     * Mendapatkan ukuran produk dari atribut varian (format "Warna · Ukuran").
+     */
+    public function getSizeAttribute(): string
+    {
+        [, $size] = $this->parseVariantParts();
+
+        return $size;
+    }
+
+    /**
+     * Memecah nilai varian menjadi pasangan [warna, ukuran].
+     *
+     * @return array{0: string, 1: string}
+     */
+    protected function parseVariantParts(): array
+    {
+        $variant = trim((string) ($this->variant ?? ''));
+
+        if ($variant === '') {
+            return ['-', '-'];
+        }
+
+        $parts = preg_split('/\s*[·|\/,]\s*/u', $variant, 2);
+
+        if (count($parts) === 2) {
+            return [
+                $parts[0] !== '' ? $parts[0] : '-',
+                $parts[1] !== '' ? $parts[1] : '-',
+            ];
+        }
+
+        if (preg_match('/^(XS|S|M|L|XL|XXL|XXXL|\d{1,2}(\s*Tahun)?)$/i', $variant)) {
+            return ['-', $variant];
+        }
+
+        return [$variant, '-'];
+    }
+
+    /**
      * Format harga satuan dalam mata uang Rupiah.
      */
     public function getFormattedPriceAttribute(): string

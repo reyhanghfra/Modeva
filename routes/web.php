@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
+use App\Http\Controllers\Petugas\TransactionController as PetugasTransactionController;
 use Illuminate\Support\Facades\Route;
 
 // Beranda pelanggan (publik)
@@ -63,4 +64,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 // Area Petugas (Khusus Role Petugas)
 Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->name('petugas.')->group(function () {
     Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/transactions', [PetugasTransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{order}', [PetugasTransactionController::class, 'show'])->name('transactions.show');
 });
