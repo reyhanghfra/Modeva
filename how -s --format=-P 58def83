@@ -1,0 +1,34 @@
+[33m58def83[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m menambahkan fitur data pelangan, data transaksi, pencarian filter dan paginasi pada role admin, dan membuat dashboard operasional pada role petugas
+ app/Http/Controllers/Admin/CustomerController.php  | 156 [32m++++++++++[m
+ .../Controllers/Admin/TransactionController.php    |  74 [32m+++++[m
+ .../Controllers/Petugas/DashboardController.php    |  80 [32m++++++[m
+ app/Http/Requests/Admin/StoreCustomerRequest.php   |  51 [32m++++[m
+ app/Http/Requests/Admin/UpdateCustomerRequest.php  |  59 [32m++++[m
+ app/Models/Customer.php                            |  26 [32m++[m
+ app/Models/Order.php                               |  73 [32m++++[m[31m-[m
+ app/Models/OrderItem.php                           |  56 [32m++++[m
+ app/Models/User.php                                |  27 [32m++[m
+ database/factories/CustomerFactory.php             |  27 [32m++[m
+ database/factories/OrderFactory.php                |  26 [32m++[m
+ .../2026_11_25_000001_create_customers_table.php   |  30 [32m++[m
+ .../2026_11_25_000002_create_orders_table.php      |  32 [32m+++[m
+ .../2026_11_25_000003_create_order_items_table.php |  34 [32m+++[m
+ database/seeders/CustomerSeeder.php                |  81 [32m++++++[m
+ database/seeders/DatabaseSeeder.php                |   2 [32m+[m
+ database/seeders/OrderSeeder.php                   | 150 [32m++++++++++[m
+ resources/views/admin/customers/create.blade.php   | 119 [32m++++++++[m
+ resources/views/admin/customers/edit.blade.php     | 125 [32m++++++++[m
+ resources/views/admin/customers/index.blade.php    | 140 [32m+++++++++[m
+ resources/views/admin/customers/show.blade.php     | 124 [32m++++++++[m
+ resources/views/admin/transactions/index.blade.php | 175 [32m++++++++++++[m
+ resources/views/admin/transactions/show.blade.php  | 256 [32m+++++++++++++++++[m
+ .../views/components/petugas/sidebar.blade.php     | 108 [32m+++++++[m
+ resources/views/layouts/petugas.blade.php          |  63 [32m++++[m
+ resources/views/petugas/dashboard.blade.php        | 192 [32m++++++++++++[m[31m-[m
+ routes/web.php                                     |  16 [32m+[m[31m-[m
+ tests/Feature/Admin/CustomerManagementTest.php     | 246 [32m++++++++++++++++[m
+ tests/Feature/Admin/PaymentManagementTest.php      |  20 [32m+[m[31m-[m
+ tests/Feature/Admin/TransactionManagementTest.php  | 317 [32m+++++++++++++++++++++[m
+ tests/Feature/Admin/UserManagementTest.php         |  20 [32m+[m[31m-[m
+ tests/Feature/Petugas/DashboardTest.php            | 157 [32m++++++++++[m
+ 32 files changed, 3022 insertions(+), 40 deletions(-)

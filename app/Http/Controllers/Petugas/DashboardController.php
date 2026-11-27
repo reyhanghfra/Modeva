@@ -55,11 +55,8 @@ class DashboardController extends Controller
                 ->get();
 
             $actionRequiredOrders = Order::query()
+                ->needsPetugasAction()
                 ->with(['user', 'latestPayment'])
-                ->whereIn('status', [
-                    Order::STATUS_VERIFIKASI_PEMBAYARAN,
-                    Order::STATUS_DIPROSES,
-                ])
                 ->orderByRaw("CASE WHEN status = 'verifikasi_pembayaran' THEN 0 ELSE 1 END")
                 ->latest('id')
                 ->take(6)

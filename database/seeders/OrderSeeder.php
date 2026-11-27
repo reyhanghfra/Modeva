@@ -19,6 +19,7 @@ class OrderSeeder extends Seeder
                 'order_number' => 'MDV-250607',
                 'customer_email' => 'bagas@modeva.test',
                 'shipping_address' => 'Jl. Pandanaran No. 27, Semarang',
+                'shipping_service' => 'JNE Reguler',
                 'status' => Order::STATUS_MENUNGGU_PEMBAYARAN,
                 'items' => [
                     [
@@ -39,6 +40,7 @@ class OrderSeeder extends Seeder
                 'order_number' => 'MDV-250608',
                 'customer_email' => 'siti@modeva.test',
                 'shipping_address' => 'Jl. Sudirman No. 105, Jakarta Pusat',
+                'shipping_service' => 'J&T Express',
                 'status' => Order::STATUS_VERIFIKASI_PEMBAYARAN,
                 'items' => [
                     [
@@ -59,6 +61,7 @@ class OrderSeeder extends Seeder
                 'order_number' => 'MDV-250609',
                 'customer_email' => 'rizky@modeva.test',
                 'shipping_address' => 'Jl. Malioboro No. 88, Yogyakarta',
+                'shipping_service' => 'SiCepat BEST',
                 'status' => Order::STATUS_DIPROSES,
                 'items' => [
                     [
@@ -73,6 +76,7 @@ class OrderSeeder extends Seeder
                 'order_number' => 'MDV-250610',
                 'customer_email' => 'maya@modeva.test',
                 'shipping_address' => 'Jl. Darmo Permai Selatan No. 12, Surabaya',
+                'shipping_service' => 'JNE YES',
                 'status' => Order::STATUS_DIKIRIM,
                 'items' => [
                     [
@@ -93,6 +97,7 @@ class OrderSeeder extends Seeder
                 'order_number' => 'MDV-250611',
                 'customer_email' => 'anindya@modeva.test',
                 'shipping_address' => 'Jl. Dago Pakar Barat No. 42, Bandung',
+                'shipping_service' => 'J&T Express',
                 'status' => Order::STATUS_SELESAI,
                 'items' => [
                     [
@@ -127,6 +132,7 @@ class OrderSeeder extends Seeder
                 [
                     'user_id' => $customer->id,
                     'shipping_address' => $data['shipping_address'],
+                    'shipping_service' => $data['shipping_service'] ?? null,
                     'total' => $total,
                     'status' => $data['status'],
                 ]

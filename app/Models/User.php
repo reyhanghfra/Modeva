@@ -36,11 +36,35 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi daftar alamat pengiriman milik pelanggan.
+     */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(CustomerAddress::class);
+    }
+
+    /**
+     * Relasi alamat utama pelanggan.
+     */
+    public function primaryAddress(): HasOne
+    {
+        return $this->hasOne(CustomerAddress::class)->where('is_primary', true);
+    }
+
+    /**
      * Relasi ke daftar pesanan milik pengguna.
      */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Relasi ke item keranjang belanja milik pelanggan.
+     */
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(CartItem::class);
     }
 
     /**

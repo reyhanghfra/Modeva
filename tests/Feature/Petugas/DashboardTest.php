@@ -117,7 +117,7 @@ class DashboardTest extends TestCase
         $response->assertSee('Pesanan Terbaru');
         $response->assertSee('MDV-DONE-02');
         $response->assertSee('Data Transaksi');
-        $response->assertSee(route('admin.transactions.index'));
+        $response->assertSee(route('petugas.transactions.index'));
     }
 
     public function test_petugas_dashboard_displays_zero_counts_when_database_is_empty(): void
