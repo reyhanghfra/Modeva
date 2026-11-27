@@ -9,12 +9,44 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Pelanggan\CartController;
+use App\Http\Controllers\Pelanggan\CheckoutController;
+use App\Http\Controllers\Pelanggan\CustomerAddressController;
+use App\Http\Controllers\Pelanggan\ProfileController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
 use App\Http\Controllers\Petugas\TransactionController as PetugasTransactionController;
 use Illuminate\Support\Facades\Route;
 
 // Beranda pelanggan (publik)
 Route::get('/', fn () => view('pelanggan.beranda'))->name('home');
+
+// Keranjang Belanja Pelanggan (Khusus Role Pelanggan)
+Route::middleware(['auth', 'role:pelanggan'])->prefix('keranjang')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('index');
+    Route::post('/', [CartController::class, 'store'])->name('store');
+    Route::patch('/{cartItem}', [CartController::class, 'update'])->name('update');
+    Route::delete('/{cartItem}', [CartController::class, 'destroy'])->name('destroy');
+});
+
+// Checkout Pelanggan (Khusus Role Pelanggan)
+Route::middleware(['auth', 'role:pelanggan'])->prefix('checkout')->name('checkout.')->group(function () {
+    Route::get('/', [CheckoutController::class, 'index'])->name('index');
+    Route::post('/', [CheckoutController::class, 'store'])->name('store');
+    Route::get('/sukses/{order}', [CheckoutController::class, 'success'])->name('success');
+});
+
+// Profil & Alamat Pelanggan (Khusus Role Pelanggan)
+Route::middleware(['auth', 'role:pelanggan'])->prefix('profil')->name('profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'index'])->name('index');
+    Route::put('/', [ProfileController::class, 'update'])->name('update');
+
+    Route::get('/alamat/tambah', [CustomerAddressController::class, 'create'])->name('addresses.create');
+    Route::post('/alamat', [CustomerAddressController::class, 'store'])->name('addresses.store');
+    Route::get('/alamat/{address}/edit', [CustomerAddressController::class, 'edit'])->name('addresses.edit');
+    Route::put('/alamat/{address}', [CustomerAddressController::class, 'update'])->name('addresses.update');
+    Route::patch('/alamat/{address}/utama', [CustomerAddressController::class, 'setPrimary'])->name('addresses.primary');
+    Route::delete('/alamat/{address}', [CustomerAddressController::class, 'destroy'])->name('addresses.destroy');
+});
 
 // Autentikasi Pengguna Tamu (Guest)
 Route::middleware('guest')->group(function () {

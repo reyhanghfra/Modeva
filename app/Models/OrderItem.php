@@ -39,6 +39,14 @@ class OrderItem extends Model
     }
 
     /**
+     * Relasi ke produk terkait.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    /**
      * Mendapatkan warna produk dari atribut varian (format "Warna · Ukuran").
      */
     public function getColorAttribute(): string
