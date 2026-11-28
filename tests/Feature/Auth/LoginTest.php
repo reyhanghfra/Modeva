@@ -69,7 +69,7 @@ class LoginTest extends TestCase
         ]);
 
         $this->assertAuthenticatedAs($pelanggan);
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect(route('pelanggan.dashboard'));
     }
 
     public function test_login_fails_with_invalid_password(): void
@@ -238,7 +238,7 @@ class LoginTest extends TestCase
 
         $response = $this->actingAs($pelanggan)->get(route('login'));
 
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect(route('pelanggan.dashboard'));
     }
 
     public function test_inactive_user_accessing_protected_route_is_logged_out_and_redirected(): void
@@ -283,7 +283,74 @@ class LoginTest extends TestCase
         ]);
 
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect(route('pelanggan.dashboard'));
         $response->assertCookie(Auth::guard()->getRecallerName());
+    }
+
+    public function test_pelanggan_is_redirected_to_intended_url_after_login(): void
+    {
+        $pelanggan = User::factory()->create([
+            'email' => 'pelanggan@modeva.test',
+            'role' => 'pelanggan',
+            'is_active' => true,
+        ]);
+
+        session()->put('url.intended', 'http://localhost/pesanan/MDV-999/pembayaran');
+
+        $response = $this->post(route('login.store'), [
+            'email' => 'pelanggan@modeva.test',
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticatedAs($pelanggan);
+        $response->assertRedirect('http://localhost/pesanan/MDV-999/pembayaran');
+    }
+
+    public function test_admin_and_petugas_ignore_intended_url_and_always_redirect_to_dashboard(): void
+    {
+        $admin = User::factory()->create([
+            'email' => 'admin@modeva.test',
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        session()->put('url.intended', 'http://localhost/pesanan/MDV-999/pembayaran');
+
+        $responseAdmin = $this->post(route('login.store'), [
+            'email' => 'admin@modeva.test',
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticatedAs($admin);
+        $responseAdmin->assertRedirect(route('admin.dashboard'));
+
+        Auth::logout();
+
+        $petugas = User::factory()->create([
+            'email' => 'petugas@modeva.test',
+            'role' => 'petugas',
+            'is_active' => true,
+        ]);
+
+        session()->put('url.intended', 'http://localhost/pesanan/MDV-999/pembayaran');
+
+        $responsePetugas = $this->post(route('login.store'), [
+            'email' => 'petugas@modeva.test',
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticatedAs($petugas);
+        $responsePetugas->assertRedirect(route('petugas.dashboard'));
+    }
+
+    public function test_pelanggan_cannot_access_admin_dashboard_gets_403(): void
+    {
+        $pelanggan = User::factory()->create([
+            'role' => 'pelanggan',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($pelanggan)->get(route('admin.dashboard'));
+        $response->assertStatus(403);
     }
 }

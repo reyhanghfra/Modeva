@@ -47,4 +47,22 @@ document.addEventListener('DOMContentLoaded', () => {
             closeSidebar();
         }
     });
+
+    // Lepas kunci scroll saat resize ke desktop breakpoint (1024px)
+    const adminMediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handleAdminBreakpoint = (e) => {
+        if (e.matches) {
+            closeSidebar();
+        }
+    };
+    if (adminMediaQuery.addEventListener) {
+        adminMediaQuery.addEventListener('change', handleAdminBreakpoint);
+    } else {
+        adminMediaQuery.addListener(handleAdminBreakpoint);
+    }
+
+    // Lepas kunci scroll saat event pageshow (kembali via tombol back browser)
+    window.addEventListener('pageshow', () => {
+        closeSidebar();
+    });
 });
