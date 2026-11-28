@@ -77,7 +77,14 @@ class AuthController extends Controller
         // Regenerate session untuk mencegah session fixation
         $request->session()->regenerate();
 
-        // Redirect ke halaman utama sesuai role
+        // Redirect: role pelanggan menggunakan intended(route('home')), sedangkan admin/petugas selalu ke homeRoute()
+        if ($user->role === 'pelanggan') {
+            return redirect()->intended(route('pelanggan.dashboard'));
+        }
+
+        // Untuk admin dan petugas, abaikan intended URL dan selalu arahkan ke dasbor mereka
+        $request->session()->forget('url.intended');
+
         return redirect()->route($user->homeRoute());
     }
 
