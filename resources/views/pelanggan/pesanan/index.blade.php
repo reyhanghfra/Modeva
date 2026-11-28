@@ -1,0 +1,7 @@
+@extends('layouts.guest')
+@section('title', 'Riwayat Pesanan - MODEVA')
+@section('content')
+<div class="w-full max-w-5xl mx-auto px-4"><div class="flex flex-wrap items-end justify-between gap-4 mb-8"><div><p class="uppercase tracking-widest text-xs text-stone-500">Akun MODEVA</p><h1 class="font-serif text-4xl mt-2">Riwayat Pesanan</h1></div><a href="{{ route('home') }}" class="underline text-sm">Kembali ke beranda</a></div>
+@forelse($orders as $order)<article class="bg-white border rounded-2xl p-5 mb-4"><div class="flex flex-wrap justify-between gap-3"><div><p class="font-semibold">{{ $order->order_number }}</p><p class="text-sm text-stone-500">{{ $order->created_at->format('d M Y, H:i') }}</p></div><span class="text-sm rounded-full bg-stone-100 px-3 py-1 h-fit">{{ $order->status_label }}</span></div><div class="mt-4 border-t pt-4 flex flex-wrap justify-between gap-3"><div class="text-sm text-stone-600">{{ $order->items->count() }} item · Total {{ $order->formatted_total }}<p>Kurir: {{ $order->shipment?->courier ?? 'Belum tersedia' }} · Resi: {{ $order->shipment?->tracking_number ?? '-' }}</p></div><form method="POST" action="{{ route('pelanggan.orders.track') }}">@csrf<input type="hidden" name="order_number" value="{{ $order->order_number }}"><button class="bg-stone-900 text-white rounded-lg px-4 py-2 text-sm">Lihat Status Pesanan</button></form></div></article>@empty<div class="bg-white border rounded-2xl p-10 text-center text-stone-500">Belum ada riwayat pesanan.</div>@endforelse
+{{ $orders->links() }}</div>
+@endsection

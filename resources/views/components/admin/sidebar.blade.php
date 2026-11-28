@@ -39,6 +39,11 @@
             'badge' => $pendingPaymentCount > 0 ? $pendingPaymentCount : null,
         ],
         [
+            'name' => 'Pengiriman dan Resi',
+            'icon' => 'truck',
+            'route' => 'admin.shipments.index',
+        ],
+        [
             'name' => 'Pelanggan',
             'icon' => 'users',
             'route' => 'admin.customers.index',
