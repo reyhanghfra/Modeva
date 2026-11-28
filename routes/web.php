@@ -12,10 +12,13 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
+use App\Http\Controllers\Storefront\ProductController as StorefrontProductController;
 use Illuminate\Support\Facades\Route;
 
 // Beranda pelanggan (publik)
-Route::get('/', fn () => view('pelanggan.beranda'))->name('home');
+Route::view('/', 'pelanggan.beranda')->name('home');
+Route::get('/products', [StorefrontProductController::class, 'index'])->name('products.index');
+Route::get('/products/{product:slug}', [StorefrontProductController::class, 'show'])->name('products.show');
 
 // Autentikasi Pengguna Tamu (Guest)
 Route::middleware('guest')->group(function () {
