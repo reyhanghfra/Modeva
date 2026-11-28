@@ -4,10 +4,12 @@ use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\PhotoController;
 use App\Http\Controllers\HomeController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 use App\Http\Controllers\Pelanggan\PaymentController as PelangganPaymentController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
 use App\Models\Order;
+use App\Http\Controllers\Storefront\ProductController as StorefrontProductController;
 use Illuminate\Support\Facades\Route;
 
 // Binding rute eksplisit untuk {order}
@@ -58,6 +61,9 @@ Route::bind('order', function ($value, $route) {
 
 // Beranda pelanggan (publik)
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::view('/', 'pelanggan.beranda')->name('home');
+Route::get('/products', [StorefrontProductController::class, 'index'])->name('products.index');
+Route::get('/products/{product:slug}', [StorefrontProductController::class, 'show'])->name('products.show');
 
 // Autentikasi Pengguna Tamu (Guest)
 Route::middleware('guest')->group(function () {
@@ -111,6 +117,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Fitur 2: Kategori Produk
     Route::resource('categories', CategoryController::class);
+    Route::resource('products', ProductController::class)->except(['show']);
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::patch('/inventory/variants/{productVariant}/stock', [InventoryController::class, 'updateStock'])
+        ->name('inventory.stock.update');
 
     // Fitur 3: Verifikasi Pembayaran
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
