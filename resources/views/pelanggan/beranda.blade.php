@@ -1,39 +1,38 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beranda - Modeva</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-[#FAF8F5] text-[#1C1917]">
-    <main class="max-w-5xl mx-auto px-5 py-10">
-        <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[#E7E0D7] pb-5">
-            <a href="{{ route('home') }}" class="font-serif text-3xl tracking-[0.2em]">MODEVA</a>
-            <nav class="flex items-center gap-4 text-sm">
-                @auth
-                    @if(auth()->user()->role === 'pelanggan')
-                        <a href="{{ route('pelanggan.orders.history') }}" class="underline underline-offset-4">Riwayat Pesanan</a>
-                    @endif
-                    <span>{{ auth()->user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">@csrf<button class="underline">Keluar</button></form>
-                @else
-                    <a href="{{ route('login') }}" class="underline underline-offset-4">Masuk</a>
-                @endauth
-            </nav>
-        </header>
-        <section class="py-20 text-center">
-            <p class="uppercase tracking-[0.3em] text-xs text-stone-500">Fashion Store</p>
-            <h1 class="font-serif text-5xl mt-4">Selamat Datang di MODEVA</h1>
-            <p class="text-stone-500 mt-4">Temukan koleksi pilihanmu dan pantau pesanan dengan mudah.</p>
-            @auth
-                @if(auth()->user()->role === 'pelanggan')
-                    <a href="{{ route('pelanggan.orders.history') }}" class="inline-block mt-8 bg-stone-900 text-white rounded-lg px-6 py-3">Lihat Riwayat Pesanan</a>
-                @endif
-            @else
-                <a href="{{ route('login') }}" class="inline-block mt-8 bg-stone-900 text-white rounded-lg px-6 py-3">Masuk ke Akun</a>
-            @endauth
-        </section>
-    </main>
-</body>
-</html>
+@extends('layouts.storefront')
+
+@section('title', 'MODEVA - Koleksi Fashion Pilihan')
+@section('meta_description', 'Temukan koleksi fashion MODEVA dengan potongan timeless dan palet warna natural.')
+
+@section('content')
+<div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+    <section class="relative overflow-hidden rounded-[2rem] border border-[#E7E0D7] bg-[#EDE7DF] px-6 py-16 text-center sm:px-12 sm:py-24">
+        <div class="absolute -right-20 -top-24 h-64 w-64 rounded-full border border-white/60 sm:h-96 sm:w-96"></div>
+        <div class="absolute -bottom-36 -left-20 h-72 w-72 rounded-full border border-white/60"></div>
+        <div class="relative mx-auto max-w-2xl">
+            <p class="text-[10px] font-medium uppercase tracking-[0.35em] text-[#78716C] sm:text-xs">Fashion, thoughtfully chosen</p>
+            <h1 class="mt-5 font-serif text-5xl leading-[0.95] text-[#1C1917] sm:text-7xl">Ketenangan dalam<br class="hidden sm:block"> setiap pilihan.</h1>
+            <p class="mx-auto mt-6 max-w-lg text-sm leading-7 text-[#57534E] sm:text-base">
+                Temukan siluet yang timeless, tekstur yang terasa istimewa, dan palet netral untuk menemani keseharianmu.
+            </p>
+            <a href="{{ route('products.index') }}" class="mt-8 inline-flex items-center justify-center rounded-full bg-[#1F1F1E] px-7 py-3.5 text-sm font-medium text-white transition-colors hover:bg-[#33312E]">
+                Jelajahi Koleksi
+            </a>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 gap-4 py-10 sm:grid-cols-3 sm:py-14" aria-label="Kategori koleksi">
+        @foreach (['Pakaian', 'Sepatu', 'Tas'] as $categoryName)
+            <a
+                href="{{ route('products.index', ['category' => \Illuminate\Support\Str::slug($categoryName)]) }}"
+                class="group flex min-h-36 items-end justify-between rounded-2xl border border-[#EFECE6] bg-white p-5 transition-colors hover:bg-[#F7F4F0] sm:p-6"
+            >
+                <div>
+                    <p class="text-[10px] uppercase tracking-[0.22em] text-[#A8A29E]">Koleksi MODEVA</p>
+                    <h2 class="mt-2 font-serif text-3xl text-[#1C1917]">{{ $categoryName }}</h2>
+                </div>
+                <span class="text-xl text-[#A8A29E] transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
+            </a>
+        @endforeach
+    </section>
+</div>
+@endsection
