@@ -196,6 +196,6 @@ class ProductCatalogTest extends TestCase
 
         $response->assertOk()
             ->assertSee(route('products.index'))
-            ->assertSee('Jelajahi Koleksi');
+            ->assertSee('Belanja Sekarang');
     }
 }

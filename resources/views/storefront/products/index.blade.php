@@ -1,4 +1,4 @@
-@extends('layouts.storefront')
+@extends('layouts.customer')
 
 @section('title', 'Katalog Fashion - MODEVA')
 @section('meta_description', 'Jelajahi koleksi pakaian, sepatu, dan tas pilihan MODEVA.')

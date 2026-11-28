@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-[#FAF8F5]">
+<html lang="id" class="bg-[#FAF8F5]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +13,8 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full text-[#1C1917] font-sans antialiased bg-[#FAF8F5]">
-    <div class="min-h-full">
+<body class="min-h-screen min-h-dvh text-[#1C1917] font-sans antialiased bg-[#FAF8F5]">
+    <div class="min-h-screen min-h-dvh">
         {{-- Mobile Backdrop Overlay --}}
         <div
             id="adminSidebarBackdrop"

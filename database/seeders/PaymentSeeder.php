@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 
@@ -11,89 +12,91 @@ class PaymentSeeder extends Seeder
 {
     /**
      * Menjalankan seeder verifikasi pembayaran jika tabel orders sudah tersedia.
+     * Idempotent dan membuat contoh pembayaran untuk pesanan yang ada serta pelanggan@modeva.test.
      */
     public function run(): void
     {
-        if (Schema::hasTable('orders') && Order::count() > 0) {
-            $orders = Order::take(5)->get();
+        if (! Schema::hasTable('orders') || Order::count() === 0) {
+            // Lewati tanpa error jika tabel orders belum dibuat oleh modul Pesanan (Orang 3)
+            return;
+        }
 
-            $statuses = [
-                Payment::STATUS_MENUNGGU_VERIFIKASI,
-                Payment::STATUS_MENUNGGU_VERIFIKASI,
-                Payment::STATUS_TERVERIFIKASI,
-                Payment::STATUS_DITOLAK,
+        // 1. Seed payments untuk pesanan yang sudah ada (misal dari OrderSeeder)
+        $orders = Order::all();
+        $statuses = [
+            Payment::STATUS_MENUNGGU_VERIFIKASI,
+            Payment::STATUS_TERVERIFIKASI,
+            Payment::STATUS_DITOLAK,
+            Payment::STATUS_BELUM_DIBAYAR,
+        ];
+
+        foreach ($orders as $index => $order) {
+            $status = match ($order->status) {
+                Order::STATUS_VERIFIKASI_PEMBAYARAN => Payment::STATUS_MENUNGGU_VERIFIKASI,
+                Order::STATUS_DIPROSES, Order::STATUS_DIKIRIM, Order::STATUS_SELESAI => Payment::STATUS_TERVERIFIKASI,
+                Order::STATUS_DIBATALKAN => Payment::STATUS_DITOLAK,
+                default => $statuses[$index % count($statuses)],
+            };
+
+            Payment::updateOrCreate(
+                ['order_id' => $order->id],
+                [
+                    'method' => 'transfer',
+                    'bank_name' => 'BCA',
+                    'sender_name' => $order->user?->name ?? 'Pelanggan Modeva',
+                    'amount' => $order->total ?? 500000,
+                    'proof_path' => null,
+                    'status' => $status,
+                    'rejection_reason' => $status === Payment::STATUS_DITOLAK ? 'Bukti transfer tidak jelas/buram.' : null,
+                    'uploaded_at' => $status !== Payment::STATUS_BELUM_DIBAYAR ? now()->subHours(2) : null,
+                    'verified_by' => $status === Payment::STATUS_TERVERIFIKASI ? 1 : null,
+                    'verified_at' => $status === Payment::STATUS_TERVERIFIKASI ? now() : null,
+                ]
+            );
+        }
+
+        // 2. Buat 2-3 payment contoh khusus untuk pelanggan@modeva.test dengan status berbeda
+        $pelanggan = User::where('email', 'pelanggan@modeva.test')->first();
+        if ($pelanggan) {
+            $pelangganOrders = Order::where('user_id', $pelanggan->id)->take(3)->get();
+
+            // Jika pelanggan@modeva.test belum memiliki pesanan, buat 3 pesanan contoh untuknya
+            if ($pelangganOrders->count() < 3) {
+                $needed = 3 - $pelangganOrders->count();
+                for ($i = 1; $i <= $needed; $i++) {
+                    Order::create([
+                        'order_number' => 'MDV-PLG-' . str_pad($pelanggan->id . $i, 5, '0', STR_PAD_LEFT),
+                        'user_id' => $pelanggan->id,
+                        'shipping_address' => 'Jl. Kemang Raya No. 12, Jakarta Selatan',
+                        'total' => 450000 * $i,
+                        'status' => Order::STATUS_MENUNGGU_PEMBAYARAN,
+                    ]);
+                }
+                $pelangganOrders = Order::where('user_id', $pelanggan->id)->take(3)->get();
+            }
+
+            $customerStatuses = [
                 Payment::STATUS_BELUM_DIBAYAR,
+                Payment::STATUS_MENUNGGU_VERIFIKASI,
+                Payment::STATUS_DITOLAK,
             ];
 
-            foreach ($orders as $index => $order) {
-                $status = $statuses[$index % count($statuses)];
-
+            foreach ($pelangganOrders as $idx => $pOrder) {
+                $cStatus = $customerStatuses[$idx % count($customerStatuses)];
                 Payment::updateOrCreate(
-                    ['order_id' => $order->id],
+                    ['order_id' => $pOrder->id],
                     [
                         'method' => 'transfer',
                         'bank_name' => 'BCA',
-                        'sender_name' => $order->user?->name ?? 'Pelanggan Modeva',
-                        'amount' => $order->total ?? 500000,
+                        'sender_name' => $pelanggan->name,
+                        'amount' => $pOrder->total ?? 450000,
                         'proof_path' => null,
-                        'status' => $status,
-                        'rejection_reason' => $status === Payment::STATUS_DITOLAK ? 'Bukti transfer tidak jelas/buram.' : null,
-                        'uploaded_at' => now(),
-                        'verified_by' => $status === Payment::STATUS_TERVERIFIKASI ? 1 : null,
-                        'verified_at' => $status === Payment::STATUS_TERVERIFIKASI ? now() : null,
+                        'status' => $cStatus,
+                        'rejection_reason' => $cStatus === Payment::STATUS_DITOLAK ? 'Bukti transfer tidak jelas/buram.' : null,
+                        'uploaded_at' => $cStatus !== Payment::STATUS_BELUM_DIBAYAR ? now()->subHours(2) : null,
+                        'verified_by' => null,
+                        'verified_at' => null,
                     ]
-                );
-            }
-        } else {
-            // Jika tabel orders belum dibuat oleh Orang 3, buat sampel data pembayaran dummy
-            $samples = [
-                [
-                    'order_id' => 1,
-                    'method' => 'transfer',
-                    'bank_name' => 'BCA',
-                    'sender_name' => 'Citra Lestari',
-                    'amount' => 450000,
-                    'status' => Payment::STATUS_MENUNGGU_VERIFIKASI,
-                    'uploaded_at' => now()->subHours(2),
-                ],
-                [
-                    'order_id' => 2,
-                    'method' => 'transfer',
-                    'bank_name' => 'Bank Mandiri',
-                    'sender_name' => 'Budi Santoso',
-                    'amount' => 899000,
-                    'status' => Payment::STATUS_MENUNGGU_VERIFIKASI,
-                    'uploaded_at' => now()->subHour(),
-                ],
-                [
-                    'order_id' => 3,
-                    'method' => 'transfer',
-                    'bank_name' => 'BRI',
-                    'sender_name' => 'Dewi Anggraini',
-                    'amount' => 320000,
-                    'status' => Payment::STATUS_TERVERIFIKASI,
-                    'verified_by' => 1,
-                    'verified_at' => now()->subDay(),
-                    'uploaded_at' => now()->subDays(2),
-                ],
-                [
-                    'order_id' => 4,
-                    'method' => 'transfer',
-                    'bank_name' => 'BNI',
-                    'sender_name' => 'Ahmad Fauzi',
-                    'amount' => 615000,
-                    'status' => Payment::STATUS_DITOLAK,
-                    'rejection_reason' => 'Nominal transfer tidak sesuai dengan tagihan pesanan.',
-                    'verified_by' => 1,
-                    'verified_at' => now()->subDays(3),
-                    'uploaded_at' => now()->subDays(3),
-                ],
-            ];
-
-            foreach ($samples as $sample) {
-                Payment::updateOrCreate(
-                    ['order_id' => $sample['order_id']],
-                    $sample
                 );
             }
         }

@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Services\PaymentVerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -89,17 +90,22 @@ class PaymentController extends Controller
      */
     public function proof(Request $request, Payment $payment): StreamedResponse
     {
-        // Hanya admin atau petugas yang diizinkan mengakses bukti transfer
-        $user = $request->user();
-        if (! $user || ! in_array($user->role, ['admin', 'petugas'], true)) {
-            abort(403, 'Anda tidak memiliki hak akses untuk melihat bukti transfer ini.');
-        }
+        Gate::authorize('viewProof', $payment);
 
         if (! $payment->proof_path || ! Storage::disk('local')->exists($payment->proof_path)) {
             abort(404, 'File bukti transfer tidak ditemukan di penyimpanan server.');
         }
 
-        return Storage::disk('local')->response($payment->proof_path);
+        $mimeType = Storage::disk('local')->mimeType($payment->proof_path) ?: 'application/octet-stream';
+
+        return Storage::disk('local')->response(
+            $payment->proof_path,
+            basename($payment->proof_path),
+            [
+                'Content-Type' => $mimeType,
+                'X-Content-Type-Options' => 'nosniff',
+            ]
+        );
     }
 
     /**

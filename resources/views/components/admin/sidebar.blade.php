@@ -58,6 +58,11 @@
             'icon' => 'users',
             'route' => 'admin.users.index',
         ],
+                [
+            'name' => 'Foto Situs',
+            'icon' => 'eye',
+            'route' => 'admin.photos.edit',
+        ],
         [
             'name' => 'Pengaturan',
             'icon' => 'settings',
