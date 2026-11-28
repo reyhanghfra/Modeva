@@ -1,4 +1,4 @@
-@props(['product', 'href' => '#', 'new' => false])
+@props(['product', 'href' => null, 'new' => false])
 
 @php
     $img = $product->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image)
@@ -12,7 +12,7 @@
     };
 @endphp
 
-<a href="{{ $href }}" class="group block">
+<a href="{{ $href ?? route('products.show', $product->slug) }}" class="group block">
     <div class="relative aspect-[4/5] rounded-3xl overflow-hidden bg-[#EDE7DF]">
         @if ($img)
             <img src="{{ $img }}" alt="{{ $product->name }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">

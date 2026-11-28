@@ -61,7 +61,6 @@ Route::bind('order', function ($value, $route) {
 
 // Beranda pelanggan (publik)
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::view('/', 'pelanggan.beranda')->name('home');
 Route::get('/products', [StorefrontProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product:slug}', [StorefrontProductController::class, 'show'])->name('products.show');
 

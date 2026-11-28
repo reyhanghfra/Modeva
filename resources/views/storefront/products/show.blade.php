@@ -1,4 +1,4 @@
-@extends('layouts.storefront')
+@extends('layouts.customer')
 
 @section('title', $product->name.' - MODEVA')
 @section('meta_description', \Illuminate\Support\Str::limit($product->description, 155))
